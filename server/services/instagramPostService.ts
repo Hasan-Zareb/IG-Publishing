@@ -1,9 +1,9 @@
 import schedule from 'node-schedule';
 import { storage } from '../storage';
-import { Post } from '@shared/schema';
+import { Post, posts } from '@shared/schema';
 import { InstagramService } from './instagramService';
 import { db } from '../db';
-import { and, eq, posts } from '@shared/schema';
+import { and, eq } from 'drizzle-orm';
 
 // Store active job schedules by post ID
 const activeInstagramJobs: Record<number, schedule.Job> = {};
