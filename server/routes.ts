@@ -1,5 +1,4 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import {
@@ -29,9 +28,7 @@ const authenticateUser = async (req: Request) => {
   return { id: 3 };
 };
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  const httpServer = createServer(app);
-  
+export function registerRoutes(app: Express) {
   // Configure multer for file uploads
   const upload = multer({
     storage: multer.memoryStorage(),
@@ -1048,18 +1045,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/scheduling-status', async (req: Request, res: Response) => {
     try {
       const user = await authenticateUser(req);
-      const { ReliableSchedulingService } = await import('./services/reliableSchedulingService');
-      const { SystemMonitoringService } = await import('./services/systemMonitoringService');
-      
-      const status = ReliableSchedulingService.getStatus();
-      const health = SystemMonitoringService.getHealthStatus();
       const overduePosts = await storage.getOverduePosts();
       const scheduledPosts = await storage.getScheduledPosts();
       
       res.json({
         system: {
-          ...status,
-          health
+          status: 'active',
+          health: 'healthy'
         },
         overduePosts: overduePosts.length,
         scheduledPosts: scheduledPosts.length,
@@ -1133,15 +1125,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/force-check-posts', async (req: Request, res: Response) => {
     try {
       const user = await authenticateUser(req);
-      const { ReliableSchedulingService } = await import('./services/reliableSchedulingService');
       
-      await ReliableSchedulingService.forceCheck();
+      // Use the serverless scheduler for manual check
+      const { ServerlessScheduler } = await import('./services/serverlessScheduler');
+      const scheduler = ServerlessScheduler.getInstance();
+      const result = await scheduler.checkAndPublishOverduePosts();
       
       const overduePosts = await storage.getOverduePosts();
       
       res.json({
         success: true,
         message: 'Manual check completed',
+        published: result.published,
+        failed: result.failed,
         overduePosts: overduePosts.length,
         timestamp: new Date().toISOString()
       });
@@ -1262,14 +1258,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Health endpoint for keep-alive service
+  // Health endpoint
   app.get('/api/health', (req: Request, res: Response) => {
     res.json({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      keepAlive: true
+      uptime: process.uptime()
     });
+  });
+
+  // Serverless scheduling endpoint
+  app.post('/api/scheduler/check', async (req: Request, res: Response) => {
+    try {
+      const { ServerlessScheduler } = await import('./services/serverlessScheduler');
+      const scheduler = ServerlessScheduler.getInstance();
+      
+      const result = await scheduler.checkAndPublishOverduePosts();
+      const stats = await scheduler.getSchedulingStats();
+      
+      res.json({
+        success: true,
+        published: result.published,
+        failed: result.failed,
+        stats,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error in scheduler check:', error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
   });
 
   // Force cleanup endpoint for clearing temporary video files
@@ -1346,6 +1366,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-
-  return httpServer;
 }
