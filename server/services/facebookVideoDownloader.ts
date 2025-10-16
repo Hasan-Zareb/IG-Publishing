@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+// Note: Puppeteer is not available in serverless environments like Vercel
 import axios from 'axios';
 import { promises as fs, statSync, createWriteStream } from 'fs';
 import path from 'path';
@@ -137,12 +137,23 @@ Facebook has tightened security for video downloads. Only public videos from pag
     quality?: string;
     error?: string;
   }> {
-    let browser;
     try {
       console.log('🔍 Extracting video info from Facebook page...');
 
+      // Check if puppeteer is available (not in serverless environments)
+      let puppeteer;
+      try {
+        puppeteer = await import('puppeteer');
+      } catch (error) {
+        return {
+          success: false,
+          error: 'Puppeteer not available in serverless environment. Facebook video downloading is not supported on Vercel.'
+        };
+      }
+
+      let browser;
       // Launch browser with stealth settings and additional Linux flags
-      browser = await puppeteer.launch({
+      browser = await puppeteer.default.launch({
         headless: true,
         executablePath: '/usr/bin/chromium',
         args: [
@@ -278,9 +289,16 @@ Facebook has tightened security for video downloads. Only public videos from pag
         ...videoInfo
       };
 
+      } catch (error) {
+        if (browser) await browser.close();
+        console.error('❌ Error extracting video info:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to extract video info'
+        };
+      }
     } catch (error) {
-      if (browser) await browser.close();
-      console.error('❌ Error extracting video info:', error);
+      console.error('❌ Error in extractVideoInfo:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to extract video info'

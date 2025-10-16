@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "vite build && esbuild server/vercel.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
@@ -93,7 +96,6 @@
     "passport": "^0.7.0",
     "passport-facebook": "^3.0.0",
     "passport-local": "^1.0.0",
-    "puppeteer": "^24.16.2",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
