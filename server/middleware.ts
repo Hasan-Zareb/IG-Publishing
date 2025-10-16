@@ -1,8 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import session from 'express-session';
-import { PostgresSessionStore } from './sessionStore';
-import { db } from './database';
+import { PgSessionStore } from './sessionStore';
+import { pool } from './database';
 
 export function setupMiddleware(app: express.Application) {
   // CORS configuration
@@ -12,7 +12,11 @@ export function setupMiddleware(app: express.Application) {
   }));
 
   // Session configuration with PostgreSQL store
-  const sessionStore = new PostgresSessionStore(db);
+  const sessionStore = new PgSessionStore({
+    pool: pool,
+    tableName: 'sessions',
+    createTableIfMissing: true
+  });
   
   app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback-secret',

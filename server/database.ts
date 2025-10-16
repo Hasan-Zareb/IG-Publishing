@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 
 // Create a single database connection pool for the application
-export const db = new Pool({
+export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20,
@@ -10,10 +10,10 @@ export const db = new Pool({
 });
 
 // Test the database connection
-db.on('connect', () => {
+pool.on('connect', () => {
   console.log('✅ Database connected successfully');
 });
 
-db.on('error', (err) => {
+pool.on('error', (err) => {
   console.error('❌ Database connection error:', err);
 });
