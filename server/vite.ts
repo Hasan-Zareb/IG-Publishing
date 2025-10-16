@@ -7,9 +7,15 @@ import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
 import { fileURLToPath } from 'url';
 
-// Get __dirname equivalent for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Get __dirname equivalent for ES modules - handle undefined import.meta.url
+let __dirname: string;
+try {
+  const __filename = fileURLToPath(import.meta.url);
+  __dirname = path.dirname(__filename);
+} catch (error) {
+  // Fallback for production environments where import.meta.url is undefined
+  __dirname = process.cwd();
+}
 
 const viteLogger = createLogger();
 
