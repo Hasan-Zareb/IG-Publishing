@@ -97,15 +97,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
+  // Serve the app on configured port (default 5000 for Replit, can be changed via PORT env var)
   // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, async () => {
+  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+  server.listen(port, "0.0.0.0", async () => {
     log(`serving on port ${port}`);
     
     // Log Facebook OAuth callback URL for configuration

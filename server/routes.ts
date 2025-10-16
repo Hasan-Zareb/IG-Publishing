@@ -22,6 +22,7 @@ import { setupGoogleOAuthRoutes } from "./routes/googleOAuth";
 import { ExcelImportService } from "./services/excelImportService";
 import { progressTracker } from "./services/progressTrackingService";
 import { reportsRouter } from "./routes/reports";
+import instagramRouter from "./routes/instagramRoutes";
 
 const authenticateUser = async (req: Request) => {
   // Use default Facebook OAuth user (ID 3) without authentication
@@ -1153,6 +1154,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Reports routes
   app.use('/api/reports', reportsRouter);
+  
+  // Temporary redirect route for old Instagram OAuth callback
+  app.get('/auth/instagram/callback', async (req: Request, res: Response) => {
+    // Redirect to the correct callback route
+    const queryString = new URLSearchParams(req.query as any).toString();
+    return res.redirect(`/api/instagram/auth/callback?${queryString}`);
+  });
+
+  // Instagram routes
+  app.use('/api/instagram', instagramRouter);
 
   // Facebook Video Download and Upload Routes
   app.post('/api/facebook-video/download', async (req: Request, res: Response) => {

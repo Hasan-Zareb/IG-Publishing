@@ -84,6 +84,29 @@ export const insertFacebookAccountSchema = createInsertSchema(facebookAccounts).
   isActive: true,
 });
 
+// Instagram accounts model
+export const instagramAccounts = pgTable("instagram_accounts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  username: text("username").notNull(),
+  instagramUserId: text("instagram_user_id").notNull().unique(),
+  accessToken: text("access_token").notNull(),
+  tokenExpiry: timestamp("token_expiry"),
+  dailyPostCount: integer("daily_post_count").default(0),
+  lastPostDate: timestamp("last_post_date"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertInstagramAccountSchema = createInsertSchema(instagramAccounts).pick({
+  userId: true,
+  username: true,
+  instagramUserId: true,
+  accessToken: true,
+  tokenExpiry: true,
+  isActive: true,
+});
+
 // Google Sheets integration model
 export const googleSheetsIntegrations = pgTable("google_sheets_integrations", {
   id: serial("id").primaryKey(),
@@ -118,11 +141,13 @@ export const insertCustomLabelSchema = createInsertSchema(customLabels).pick({
   color: true,
 });
 
-// Posts model
+// Posts model (supports both Facebook and Instagram)
 export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => users.id),
+  platform: text("platform").notNull().default("facebook"), // 'facebook' or 'instagram'
   accountId: integer("account_id").references(() => facebookAccounts.id),
+  instagramAccountId: integer("instagram_account_id").references(() => instagramAccounts.id),
   content: text("content").notNull(),
   mediaUrl: text("media_url"),
   mediaType: text("media_type").default("none"), // none, photo, video, reel
@@ -134,12 +159,15 @@ export const posts = pgTable("posts", {
   status: text("status").notNull(),
   sheetRowId: text("sheet_row_id"),
   errorMessage: text("error_message"),
+  instagramPostId: text("instagram_post_id"), // Instagram media container ID
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertPostSchema = createInsertSchema(posts).pick({
   userId: true,
+  platform: true,
   accountId: true,
+  instagramAccountId: true,
   content: true,
   mediaUrl: true,
   mediaType: true,
@@ -151,6 +179,7 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   status: true,
   sheetRowId: true,
   errorMessage: true,
+  instagramPostId: true,
 }).extend({
   scheduledFor: z.union([z.string(), z.date()]).optional().transform((val) => {
     if (val instanceof Date) return val;
@@ -179,6 +208,7 @@ export const insertActivitySchema = createInsertSchema(activities).pick({
 // Define relations
 export const usersRelations = relations(users, ({ many }) => ({
   facebookAccounts: many(facebookAccounts),
+  instagramAccounts: many(instagramAccounts),
   googleSheetsIntegrations: many(googleSheetsIntegrations),
   customLabels: many(customLabels),
   posts: many(posts),
@@ -188,6 +218,14 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const facebookAccountsRelations = relations(facebookAccounts, ({ one, many }) => ({
   user: one(users, {
     fields: [facebookAccounts.userId],
+    references: [users.id],
+  }),
+  posts: many(posts),
+}));
+
+export const instagramAccountsRelations = relations(instagramAccounts, ({ one, many }) => ({
+  user: one(users, {
+    fields: [instagramAccounts.userId],
     references: [users.id],
   }),
   posts: many(posts),
@@ -216,6 +254,10 @@ export const postsRelations = relations(posts, ({ one }) => ({
     fields: [posts.accountId],
     references: [facebookAccounts.id],
   }),
+  instagramAccount: one(instagramAccounts, {
+    fields: [posts.instagramAccountId],
+    references: [instagramAccounts.id],
+  }),
 }));
 
 export const activitiesRelations = relations(activities, ({ one }) => ({
@@ -240,6 +282,9 @@ export type RegisterData = z.infer<typeof registerSchema>;
 
 export type FacebookAccount = typeof facebookAccounts.$inferSelect;
 export type InsertFacebookAccount = z.infer<typeof insertFacebookAccountSchema>;
+
+export type InstagramAccount = typeof instagramAccounts.$inferSelect;
+export type InsertInstagramAccount = z.infer<typeof insertInstagramAccountSchema>;
 
 export type GoogleSheetsIntegration = typeof googleSheetsIntegrations.$inferSelect;
 export type InsertGoogleSheetsIntegration = z.infer<typeof insertGoogleSheetsIntegrationSchema>;

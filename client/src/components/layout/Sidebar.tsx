@@ -40,7 +40,19 @@ export default function Sidebar() {
         </Link>
         
         <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          Configuration
+          Instagram
+        </div>
+        <Link href="/instagram" className={`flex items-center px-4 py-3 ${isActive('/instagram') ? 'text-purple-600 bg-purple-50 border-l-4 border-purple-600' : 'text-gray-600 hover:bg-fb-light-gray'}`}>
+          <i className="fa-brands fa-instagram w-5"></i>
+          <span className="ml-3">Instagram Publisher</span>
+        </Link>
+        <Link href="/instagram-accounts" className={`flex items-center px-4 py-3 ${isActive('/instagram-accounts') ? 'text-purple-600 bg-purple-50 border-l-4 border-purple-600' : 'text-gray-600 hover:bg-fb-light-gray'}`}>
+          <i className="fa-brands fa-instagram w-5"></i>
+          <span className="ml-3">Instagram Accounts</span>
+        </Link>
+        
+        <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Facebook
         </div>
         <Link href="/facebook-accounts" className={`flex items-center px-4 py-3 ${isActive('/facebook-accounts') ? 'text-fb-blue bg-fb-light-gray border-l-4 border-fb-blue' : 'text-gray-600 hover:bg-fb-light-gray'}`}>
           <i className="fa-brands fa-facebook w-5"></i>

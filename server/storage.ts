@@ -2,6 +2,7 @@ import {
   User, InsertUser, users,
   PlatformUser, InsertPlatformUser, platformUsers,
   FacebookAccount, InsertFacebookAccount, facebookAccounts,
+  InstagramAccount, InsertInstagramAccount, instagramAccounts,
   GoogleSheetsIntegration, InsertGoogleSheetsIntegration, googleSheetsIntegrations,
   CustomLabel, InsertCustomLabel, customLabels,
   Post, InsertPost, posts,
@@ -35,6 +36,14 @@ export interface IStorage {
   createFacebookAccount(account: InsertFacebookAccount): Promise<FacebookAccount>;
   updateFacebookAccount(id: number, data: Partial<FacebookAccount>): Promise<FacebookAccount | undefined>;
   deleteFacebookAccount(id: number): Promise<boolean>;
+
+  // Instagram account operations
+  getInstagramAccounts(userId: number): Promise<InstagramAccount[]>;
+  getInstagramAccount(id: number): Promise<InstagramAccount | undefined>;
+  getInstagramAccountByUserId(instagramUserId: string): Promise<InstagramAccount | undefined>;
+  createInstagramAccount(account: InsertInstagramAccount): Promise<InstagramAccount>;
+  updateInstagramAccount(id: number, data: Partial<InstagramAccount>): Promise<InstagramAccount | undefined>;
+  deleteInstagramAccount(id: number): Promise<boolean>;
 
   // Google Sheets integration operations
   getGoogleSheetsIntegration(userId: number): Promise<GoogleSheetsIntegration | undefined>;
@@ -184,6 +193,49 @@ export class DatabaseStorage implements IStorage {
       .delete(facebookAccounts)
       .where(eq(facebookAccounts.id, id))
       .returning({ id: facebookAccounts.id });
+    return !!deleted;
+  }
+
+  // Instagram account operations
+  async getInstagramAccounts(userId: number): Promise<InstagramAccount[]> {
+    return db.select().from(instagramAccounts).where(eq(instagramAccounts.userId, userId));
+  }
+
+  async getInstagramAccount(id: number): Promise<InstagramAccount | undefined> {
+    const [account] = await db.select().from(instagramAccounts).where(eq(instagramAccounts.id, id));
+    return account;
+  }
+
+  async getInstagramAccountByUserId(instagramUserId: string): Promise<InstagramAccount | undefined> {
+    const [account] = await db.select().from(instagramAccounts).where(eq(instagramAccounts.instagramUserId, instagramUserId));
+    return account;
+  }
+
+  async createInstagramAccount(account: InsertInstagramAccount): Promise<InstagramAccount> {
+    const [newAccount] = await db.insert(instagramAccounts).values(account).returning();
+    return newAccount;
+  }
+
+  async updateInstagramAccount(id: number, data: Partial<InstagramAccount>): Promise<InstagramAccount | undefined> {
+    const [updatedAccount] = await db
+      .update(instagramAccounts)
+      .set(data)
+      .where(eq(instagramAccounts.id, id))
+      .returning();
+    return updatedAccount;
+  }
+
+  async deleteInstagramAccount(id: number): Promise<boolean> {
+    // First delete all posts associated with this account
+    await db
+      .delete(posts)
+      .where(eq(posts.instagramAccountId, id));
+      
+    // Then delete the account
+    const [deleted] = await db
+      .delete(instagramAccounts)
+      .where(eq(instagramAccounts.id, id))
+      .returning({ id: instagramAccounts.id });
     return !!deleted;
   }
 
@@ -399,6 +451,7 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private platformUsers: Map<number, PlatformUser>;
   private facebookAccounts: Map<number, FacebookAccount>;
+  private instagramAccounts: Map<number, InstagramAccount>;
   private googleSheetsIntegrations: Map<number, GoogleSheetsIntegration>;
   private customLabels: Map<number, CustomLabel>;
   private posts: Map<number, Post>;
@@ -407,6 +460,7 @@ export class MemStorage implements IStorage {
     users: number;
     platformUsers: number;
     facebookAccounts: number;
+    instagramAccounts: number;
     googleSheetsIntegrations: number;
     customLabels: number;
     posts: number;
@@ -417,6 +471,7 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.platformUsers = new Map();
     this.facebookAccounts = new Map();
+    this.instagramAccounts = new Map();
     this.googleSheetsIntegrations = new Map();
     this.customLabels = new Map();
     this.posts = new Map();
@@ -425,6 +480,7 @@ export class MemStorage implements IStorage {
       users: 1,
       platformUsers: 1,
       facebookAccounts: 1,
+      instagramAccounts: 1,
       googleSheetsIntegrations: 1,
       customLabels: 1,
       posts: 1,
@@ -582,6 +638,53 @@ export class MemStorage implements IStorage {
 
   async deleteFacebookAccount(id: number): Promise<boolean> {
     return this.facebookAccounts.delete(id);
+  }
+
+  // Instagram account operations
+  async getInstagramAccounts(userId: number): Promise<InstagramAccount[]> {
+    return Array.from(this.instagramAccounts.values()).filter(
+      (account) => account.userId === userId
+    );
+  }
+
+  async getInstagramAccount(id: number): Promise<InstagramAccount | undefined> {
+    return this.instagramAccounts.get(id);
+  }
+
+  async getInstagramAccountByUserId(instagramUserId: string): Promise<InstagramAccount | undefined> {
+    return Array.from(this.instagramAccounts.values()).find(
+      (account) => account.instagramUserId === instagramUserId
+    );
+  }
+
+  async createInstagramAccount(account: InsertInstagramAccount): Promise<InstagramAccount> {
+    const id = this.currentIds.instagramAccounts++;
+    const now = new Date();
+    const newAccount: InstagramAccount = { 
+      ...account, 
+      id, 
+      createdAt: now,
+      userId: account.userId || null,
+      tokenExpiry: account.tokenExpiry || null,
+      dailyPostCount: 0,
+      lastPostDate: null,
+      isActive: account.isActive !== false
+    };
+    this.instagramAccounts.set(id, newAccount);
+    return newAccount;
+  }
+
+  async updateInstagramAccount(id: number, data: Partial<InstagramAccount>): Promise<InstagramAccount | undefined> {
+    const account = this.instagramAccounts.get(id);
+    if (!account) return undefined;
+    
+    const updatedAccount = { ...account, ...data };
+    this.instagramAccounts.set(id, updatedAccount);
+    return updatedAccount;
+  }
+
+  async deleteInstagramAccount(id: number): Promise<boolean> {
+    return this.instagramAccounts.delete(id);
   }
 
   // Asana integration operations
