@@ -7,7 +7,7 @@ import passport from "passport";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { postService } from "./services/postService";
-import schedule from "node-schedule";
+// Note: node-schedule removed for serverless compatibility
 import { pool } from "./db";
 import { progressTracker } from "./services/progressTrackingService";
 

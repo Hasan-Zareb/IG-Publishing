@@ -10,7 +10,7 @@ import {
   insertActivitySchema,
   FacebookAccount
 } from "../shared/schema";
-import schedule from "node-schedule";
+// Note: node-schedule removed for serverless compatibility
 import multer from "multer";
 import { uploadImage } from "./utils/cloudinary";
 import passport from "passport";

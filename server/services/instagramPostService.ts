@@ -1,4 +1,4 @@
-import schedule from 'node-schedule';
+// Note: node-schedule removed for serverless compatibility
 import { storage } from '../storage';
 import { Post, posts } from '@shared/schema';
 import { InstagramService } from './instagramService';
