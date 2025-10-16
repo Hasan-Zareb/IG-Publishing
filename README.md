@@ -39,4 +39,4 @@ This project is configured for deployment on Vercel. The build process automatic
 
 ## License
 
-MIT
+MIT# Vercel deployment trigger
