@@ -1,6 +1,4 @@
-import { db } from '../database';
-import { posts } from '../shared/schema';
-import { eq, and, lt } from 'drizzle-orm';
+import { pool } from '../database';
 
 // Serverless-compatible scheduler that doesn't rely on persistent background jobs
 export class ServerlessScheduler {
@@ -16,19 +14,16 @@ export class ServerlessScheduler {
   // Check for overdue posts and publish them
   async checkAndPublishOverduePosts(): Promise<{ published: number; failed: number }> {
     try {
-      const now = new Date();
+      const now = new Date().toISOString();
       
       // Get all scheduled posts that are overdue
-      const overduePosts = await db
-        .select()
-        .from(posts)
-        .where(
-          and(
-            eq(posts.status, 'scheduled'),
-            lt(posts.scheduledFor, now)
-          )
-        );
+      const result = await pool.query(`
+        SELECT * FROM posts 
+        WHERE status = 'scheduled' 
+        AND scheduled_for < $1
+      `, [now]);
 
+      const overduePosts = result.rows;
       let published = 0;
       let failed = 0;
 
@@ -41,13 +36,13 @@ export class ServerlessScheduler {
           console.error(`Failed to publish post ${post.id}:`, error);
           
           // Mark post as failed
-          await db
-            .update(posts)
-            .set({
-              status: 'failed',
-              errorMessage: error instanceof Error ? error.message : 'Unknown error'
-            })
-            .where(eq(posts.id, post.id));
+          await pool.query(`
+            UPDATE posts 
+            SET status = 'failed', 
+                error_message = $1,
+                updated_at = NOW()
+            WHERE id = $2
+          `, [error instanceof Error ? error.message : 'Unknown error', post.id]);
           
           failed++;
         }
@@ -82,13 +77,13 @@ export class ServerlessScheduler {
       }
 
       // Update post status
-      await db
-        .update(posts)
-        .set({
-          status: 'published',
-          publishedAt: new Date()
-        })
-        .where(eq(posts.id, post.id));
+      await pool.query(`
+        UPDATE posts 
+        SET status = 'published', 
+            published_at = NOW(),
+            updated_at = NOW()
+        WHERE id = $1
+      `, [post.id]);
 
     } catch (error) {
       console.error(`Error publishing post ${post.id}:`, error);
@@ -103,37 +98,36 @@ export class ServerlessScheduler {
     nextScheduled: Date | null;
   }> {
     try {
-      const now = new Date();
+      const now = new Date().toISOString();
       
       // Get total scheduled posts
-      const totalScheduled = await db
-        .select({ count: posts.id })
-        .from(posts)
-        .where(eq(posts.status, 'scheduled'));
+      const totalResult = await pool.query(`
+        SELECT COUNT(*) as count 
+        FROM posts 
+        WHERE status = 'scheduled'
+      `);
 
       // Get overdue posts
-      const overdue = await db
-        .select({ count: posts.id })
-        .from(posts)
-        .where(
-          and(
-            eq(posts.status, 'scheduled'),
-            lt(posts.scheduledFor, now)
-          )
-        );
+      const overdueResult = await pool.query(`
+        SELECT COUNT(*) as count 
+        FROM posts 
+        WHERE status = 'scheduled' 
+        AND scheduled_for < $1
+      `, [now]);
 
       // Get next scheduled post
-      const nextScheduled = await db
-        .select({ scheduledFor: posts.scheduledFor })
-        .from(posts)
-        .where(eq(posts.status, 'scheduled'))
-        .orderBy(posts.scheduledFor)
-        .limit(1);
+      const nextResult = await pool.query(`
+        SELECT scheduled_for 
+        FROM posts 
+        WHERE status = 'scheduled' 
+        ORDER BY scheduled_for ASC 
+        LIMIT 1
+      `);
 
       return {
-        totalScheduled: totalScheduled.length,
-        overdue: overdue.length,
-        nextScheduled: nextScheduled[0]?.scheduledFor || null
+        totalScheduled: parseInt(totalResult.rows[0].count),
+        overdue: parseInt(overdueResult.rows[0].count),
+        nextScheduled: nextResult.rows[0]?.scheduled_for || null
       };
     } catch (error) {
       console.error('Error getting scheduling stats:', error);
