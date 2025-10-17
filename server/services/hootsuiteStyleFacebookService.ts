@@ -509,7 +509,7 @@ export class HootsuiteStyleFacebookService {
             cleanup();
             
             if (uploadResult.success) {
-              console.log(`✅ ACTUAL VIDEO UPLOADED: ${uploadResult.method} method, ${uploadResult.finalSizeMB?.toFixed(2)}MB`);
+              console.log(`✅ ACTUAL VIDEO UPLOADED: ${uploadResult.method} method`);
               return uploadResult;
             } else {
               console.log(`⚠️ Video upload failed: ${uploadResult.error}`);
@@ -1404,7 +1404,7 @@ Google Drive's security policies prevent external applications from downloading 
       const formData = new FormData();
       
       // Add video file using fileFromPath for proper handling
-      const videoFile = await fileFromPath(filePath, 'video.mp4', { type: 'video/mp4' });
+      const videoFile = await fileFromPath(filePath);
       formData.append('source', videoFile);
       
       formData.append('access_token', pageAccessToken);
@@ -1493,15 +1493,15 @@ Google Drive's security policies prevent external applications from downloading 
       console.log('📊 Facebook raw response:', responseText.substring(0, 500));
       if (responseText.trim()) {
         try {
-          data = JSON.parse(responseText);
+          data = JSON.parse(responseText) as any;
           console.log('📊 Parsed Facebook response:', JSON.stringify(data, null, 2));
         } catch (parseError) {
           console.log('⚠️ Non-JSON response from Facebook:', responseText);
-          data = { error: { message: `Invalid response format: ${responseText}` } };
+          data = { error: { message: `Invalid response format: ${responseText}` } } as any;
         }
       } else {
         console.log('⚠️ Empty response from Facebook API - likely file too large for standard upload');
-        data = { error: { message: 'File too large for standard upload - switching to chunked upload' } };
+        data = { error: { message: 'File too large for standard upload - switching to chunked upload' } } as any;
       }
       
       // Clean up temporary file after processing response
