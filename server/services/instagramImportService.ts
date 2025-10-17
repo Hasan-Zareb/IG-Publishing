@@ -95,7 +95,7 @@ export class InstagramImportService {
   static async importFromCSV(
     fileBuffer: Buffer,
     userId: number,
-    instagramAccountId: number
+    instagramAccountId?: number
   ): Promise<InstagramImportResult> {
     try {
       // Detect file type

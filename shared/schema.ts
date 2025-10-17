@@ -181,11 +181,7 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   errorMessage: true,
   instagramPostId: true,
 }).extend({
-  scheduledFor: z.union([z.string(), z.date()]).optional().transform((val) => {
-    if (val instanceof Date) return val;
-    if (typeof val === 'string') return new Date(val);
-    return val;
-  }),
+  scheduledFor: z.date().optional(),
 });
 
 // Activities model

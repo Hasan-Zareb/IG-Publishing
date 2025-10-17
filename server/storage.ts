@@ -853,7 +853,8 @@ export class MemStorage implements IStorage {
       link: post.link || null,
       userId: post.userId || null,
       platform: post.platform || 'facebook',
-      accountId: post.accountId || null
+      accountId: post.accountId || null,
+      instagramAccountId: post.instagramAccountId || null
     };
     this.posts.set(id, newPost);
     return newPost;
