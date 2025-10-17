@@ -858,6 +858,7 @@ export class MemStorage implements IStorage {
       mediaUrl: post.mediaUrl || null,
       mediaType: post.mediaType || null,
       language: post.language || null,
+      scheduledFor: post.scheduledFor || null,
       labels: Array.isArray(post.labels) ? [...post.labels] : []
     };
     this.posts.set(id, newPost);
