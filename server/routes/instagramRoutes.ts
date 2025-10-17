@@ -363,7 +363,7 @@ router.post('/import-csv', upload.single('file'), async (req: Request, res: Resp
     const result = await InstagramImportService.importFromCSV(
       req.file.buffer,
       user.id,
-      accountIdNumber || undefined
+      accountIdNumber
     );
     
     if (result.success) {

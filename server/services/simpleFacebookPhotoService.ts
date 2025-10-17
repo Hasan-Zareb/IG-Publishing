@@ -234,7 +234,7 @@ export class SimpleFacebookPhotoService {
           body: postData.toString()
         });
         
-        const data = await response.json();
+        const data = await response.json() as any;
         
         if (!response.ok || data.error) {
           console.error('Facebook photo URL error:', data.error);
