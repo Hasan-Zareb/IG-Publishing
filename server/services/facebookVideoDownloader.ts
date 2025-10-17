@@ -137,11 +137,11 @@ Facebook has tightened security for video downloads. Only public videos from pag
     quality?: string;
     error?: string;
   }> {
+    // Check if puppeteer is available (not in serverless environments)
+    let browser: any = null;
     try {
       console.log('🔍 Extracting video info from Facebook page...');
 
-      // Check if puppeteer is available (not in serverless environments)
-      let browser: any = null;
       try {
         // Use dynamic import to avoid TypeScript compilation issues
         const puppeteer = await eval('import("puppeteer")');
