@@ -259,7 +259,7 @@ export function registerRoutes(app: Express) {
         const post = await storage.createPost({
           ...result.data,
           userId: user.id,
-          scheduledFor: scheduledForUTC
+          scheduledFor: scheduledForUTC.toISOString()
         } as any);
 
         // Set up the actual scheduling job
@@ -1084,7 +1084,7 @@ export function registerRoutes(app: Express) {
       
       const raceConditionActivities = activities.filter(activity => 
         activity.type === 'system_race_condition_prevented' && 
-        new Date(activity.createdAt) > twentyFourHoursAgo
+        activity.createdAt && new Date(activity.createdAt) > twentyFourHoursAgo
       );
       
       // Get duplicate posts prevention count
@@ -1093,7 +1093,7 @@ export function registerRoutes(app: Express) {
       // Get successful publications in last 24 hours
       const successfulPublications = activities.filter(activity => 
         activity.type === 'post_published' && 
-        new Date(activity.createdAt) > twentyFourHoursAgo
+        activity.createdAt && new Date(activity.createdAt) > twentyFourHoursAgo
       ).length;
       
       res.json({
@@ -1103,9 +1103,9 @@ export function registerRoutes(app: Express) {
           protection_active: true,
           last_prevention: raceConditionActivities.length > 0 ? raceConditionActivities[0].createdAt : null,
           prevented_posts: raceConditionActivities.map(activity => ({
-            postId: activity.metadata?.postId,
-            preventedBy: activity.metadata?.preventedBy,
-            scheduledTime: activity.metadata?.originalScheduledTime,
+            postId: (activity.metadata as any)?.postId,
+            preventedBy: (activity.metadata as any)?.preventedBy,
+            scheduledTime: (activity.metadata as any)?.originalScheduledTime,
             preventedAt: activity.createdAt
           }))
         },

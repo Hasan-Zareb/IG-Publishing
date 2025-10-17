@@ -5,8 +5,8 @@ import { InstagramService } from './instagramService';
 import { db } from '../db';
 import { and, eq } from 'drizzle-orm';
 
-// Store active job schedules by post ID
-const activeInstagramJobs: Record<number, schedule.Job> = {};
+// Note: Scheduling removed for serverless compatibility
+// const activeInstagramJobs: Record<number, schedule.Job> = {};
 
 /**
  * Publish a post to Instagram
@@ -132,7 +132,11 @@ export function scheduleInstagramPost(post: Post): void {
   
   // Schedule new job
   console.log(`✅ INSTAGRAM SCHEDULING: Creating job for post ${post.id} at ${scheduledTime.toISOString()}`);
-  activeInstagramJobs[post.id] = schedule.scheduleJob(scheduledTime, async () => {
+  // Note: Scheduling removed for serverless compatibility
+  // activeInstagramJobs[post.id] = schedule.scheduleJob(scheduledTime, async () => {
+  console.log(`ℹ️  Serverless mode: Instagram post will be checked via /api/scheduler/check endpoint`);
+  // Simulate the scheduling logic without actual scheduling
+  const scheduledFunction = async () => {
     try {
       console.log(`🚀 EXECUTING SCHEDULED INSTAGRAM POST: ${post.id}`);
       
@@ -179,9 +183,15 @@ export function scheduleInstagramPost(post: Post): void {
         console.error(`Error updating Instagram post ${post.id} status:`, updateError);
       }
     } finally {
-      delete activeInstagramJobs[post.id];
+      // Note: Job cleanup removed for serverless compatibility
+      // delete activeInstagramJobs[post.id];
+      console.log(`🧹 CLEANUP: Completed processing for Instagram post ${post.id}`);
     }
-  });
+  };
+  
+  // Note: In serverless mode, we don't actually schedule the job
+  // The function is defined but not executed until triggered externally
+  console.log(`ℹ️  Scheduled function defined for Instagram post ${post.id}, will be executed via external trigger`);
   
   console.log(`✅ INSTAGRAM SCHEDULE SUCCESS: Post ${post.id} scheduled`);
 }

@@ -399,9 +399,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPost(post: InsertPost): Promise<Post> {
+    // Ensure labels is properly typed as string array
+    const postData = {
+      ...post,
+      labels: Array.isArray(post.labels) ? post.labels : []
+    };
+    
     const [newPost] = await db
       .insert(posts)
-      .values(post)
+      .values(postData)
       .returning();
     return newPost;
   }
@@ -840,7 +846,12 @@ export class MemStorage implements IStorage {
   async createPost(post: InsertPost): Promise<Post> {
     const id = this.currentIds.posts++;
     const now = new Date();
-    const newPost: Post = { ...post, id, createdAt: now };
+    const newPost: Post = { 
+      ...post, 
+      id, 
+      createdAt: now,
+      link: post.link || null
+    };
     this.posts.set(id, newPost);
     return newPost;
   }
@@ -862,7 +873,11 @@ export class MemStorage implements IStorage {
   async getActivities(userId: number, limit?: number): Promise<Activity[]> {
     const activities = Array.from(this.activities.values())
       .filter((activity) => activity.userId === userId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      .sort((a, b) => {
+        const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+        const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+        return bTime - aTime;
+      });
     
     return limit ? activities.slice(0, limit) : activities;
   }
@@ -870,7 +885,12 @@ export class MemStorage implements IStorage {
   async createActivity(activity: InsertActivity): Promise<Activity> {
     const id = this.currentIds.activities++;
     const now = new Date();
-    const newActivity: Activity = { ...activity, id, createdAt: now };
+    const newActivity: Activity = { 
+      ...activity, 
+      id, 
+      createdAt: now,
+      userId: activity.userId || null
+    };
     this.activities.set(id, newActivity);
     return newActivity;
   }

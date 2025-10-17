@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { storage } from '../storage';
 import { PlatformUser, InsertPlatformUser, LoginCredentials, RegisterData } from '@shared/schema';
 

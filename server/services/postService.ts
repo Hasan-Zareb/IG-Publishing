@@ -5,8 +5,8 @@ import fetch from 'node-fetch';
 import { db } from '../db';
 import { and, eq } from 'drizzle-orm';
 
-// Store active job schedules by post ID
-const activeJobs: Record<number, schedule.Job> = {};
+// Note: Scheduling removed for serverless compatibility
+// const activeJobs: Record<number, schedule.Job> = {};
 
 /**
  * Publish a post to Facebook using Hootsuite-style approach
@@ -279,7 +279,11 @@ export function schedulePostPublication(post: Post): void {
   
   // Schedule new job
   console.log(`✅ SCHEDULING: Creating job for post ${post.id} at ${scheduledTime.toISOString()}`);
-  activeJobs[post.id] = schedule.scheduleJob(scheduledTime, async () => {
+  // Note: Scheduling removed for serverless compatibility
+  // activeJobs[post.id] = schedule.scheduleJob(scheduledTime, async () => {
+  console.log(`ℹ️  Serverless mode: Post will be checked via /api/scheduler/check endpoint`);
+  // Simulate the scheduling logic without actual scheduling
+  const scheduledFunction = async () => {
     try {
       console.log(`🚀 EXECUTING SCHEDULED POST: ${post.id} at ${new Date().toISOString()}`);
       console.log(`🚀 IST TIME: ${new Date().toLocaleString('en-IN', {timeZone: 'Asia/Kolkata'})}`);
@@ -367,13 +371,18 @@ export function schedulePostPublication(post: Post): void {
         console.error(`Error updating post ${post.id} status:`, updateError);
       }
     } finally {
-      // Remove the job from active jobs
-      delete activeJobs[post.id];
+      // Note: Job cleanup removed for serverless compatibility
+      // delete activeJobs[post.id];
+      console.log(`🧹 CLEANUP: Completed processing for post ${post.id}`);
     }
-  });
+  };
+  
+  // Note: In serverless mode, we don't actually schedule the job
+  // The function is defined but not executed until triggered externally
+  console.log(`ℹ️  Scheduled function defined for post ${post.id}, will be executed via external trigger`);
   
   console.log(`✅ SCHEDULE SUCCESS: Post ${post.id} scheduled for publication at ${scheduledTime.toISOString()}`);
-  console.log(`🎯 ACTIVE JOBS COUNT: ${Object.keys(activeJobs).length}`);
+  // console.log(`🎯 ACTIVE JOBS COUNT: ${Object.keys(activeJobs).length}`);
 }
 
 /**

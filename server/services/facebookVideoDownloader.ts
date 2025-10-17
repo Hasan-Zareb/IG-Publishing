@@ -151,7 +151,7 @@ Facebook has tightened security for video downloads. Only public videos from pag
         };
       }
 
-      let browser;
+      let browser: any = null;
       // Launch browser with stealth settings and additional Linux flags
       browser = await puppeteer.default.launch({
         headless: true,

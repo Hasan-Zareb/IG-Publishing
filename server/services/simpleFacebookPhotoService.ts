@@ -76,7 +76,7 @@ export class SimpleFacebookPhotoService {
           
           const response = await fetch(endpoint, {
             method: 'POST',
-            body: formData
+            body: formData as any
           });
           
           const data = await response.json();
@@ -168,7 +168,7 @@ export class SimpleFacebookPhotoService {
           
           const response = await fetch(endpoint, {
             method: 'POST',
-            body: formData
+            body: formData as any
           });
           
           const data = await response.json();
