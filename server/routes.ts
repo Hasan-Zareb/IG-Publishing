@@ -259,7 +259,7 @@ export function registerRoutes(app: Express) {
         const post = await storage.createPost({
           ...result.data,
           userId: user.id,
-          scheduledFor: scheduledForUTC
+          scheduledFor: scheduledForUTC as any
         } as any);
 
         // Set up the actual scheduling job
