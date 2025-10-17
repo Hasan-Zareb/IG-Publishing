@@ -297,13 +297,6 @@ Facebook has tightened security for video downloads. Only public videos from pag
         error: error instanceof Error ? error.message : 'Failed to extract video info'
       };
     }
-    } catch (error) {
-      console.error('❌ Error in extractVideoInfo:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to extract video info'
-      };
-    }
   }
 
   /**
