@@ -183,7 +183,7 @@ Facebook has tightened security for video downloads. Only public videos from pag
 
       // Block unnecessary resources for faster loading
       await page.setRequestInterception(true);
-      page.on('request', (req) => {
+      page.on('request', (req: any) => {
         const resourceType = req.resourceType();
         if (['stylesheet', 'font', 'image'].includes(resourceType)) {
           req.abort();

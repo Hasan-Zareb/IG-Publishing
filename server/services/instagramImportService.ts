@@ -177,8 +177,8 @@ export class InstagramImportService {
     const dataRows = jsonData.slice(1);
     
     return dataRows
-      .filter((row: any) => Array.isArray(row) && row.some(cell => cell))
-      .map((row: any[]) => {
+      .filter((row: any) => Array.isArray(row) && row.some((cell: any) => cell))
+      .map((row: any) => {
         const obj: any = {};
         headers.forEach((header, index) => {
           if (header) {

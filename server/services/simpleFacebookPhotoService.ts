@@ -79,7 +79,7 @@ export class SimpleFacebookPhotoService {
             body: formData as any
           });
           
-          const data = await response.json();
+          const data = await response.json() as any;
           
           if (!response.ok || data.error) {
             console.error('Facebook local photo upload error:', data.error);
@@ -171,7 +171,7 @@ export class SimpleFacebookPhotoService {
             body: formData as any
           });
           
-          const data = await response.json();
+          const data = await response.json() as any;
           
           // Clean up downloaded file
           // Note: cleanup method not available in serverless environment

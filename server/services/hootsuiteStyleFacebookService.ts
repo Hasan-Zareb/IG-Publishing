@@ -224,7 +224,7 @@ export class HootsuiteStyleFacebookService {
               body: formData as any
             });
             
-            const data = await response.json();
+            const data = await response.json() as any;
             
             // Clean up downloaded file
             // Note: cleanup method not available in serverless environment
@@ -386,8 +386,7 @@ export class HootsuiteStyleFacebookService {
               console.log('✅ DEFINITIVE FACEBOOK VIDEO UPLOADED SUCCESSFULLY');
               return {
                 success: true,
-                postId: uploadResult.videoId,
-                method: 'definitive_facebook_upload'
+                postId: uploadResult.videoId
               };
             }
           }
@@ -412,8 +411,7 @@ export class HootsuiteStyleFacebookService {
             console.log('✅ LOCAL VIDEO UPLOADED SUCCESSFULLY');
             return {
               success: true,
-              postId: uploadResult.videoId,
-              method: 'local_file_upload'
+              postId: uploadResult.videoId
             };
           } else {
             throw new Error(uploadResult.error || 'Local file upload failed');
@@ -645,10 +643,7 @@ export class HootsuiteStyleFacebookService {
             // CRITICAL FIX: Always cleanup files even on failure to prevent disk space issues
             // Log the file paths first for debugging, then delete
             console.log('🧹 FORCE CLEANUP: Deleting temporary files to prevent disk space issues');
-            if (result.cleanup) {
-              console.log(`🧹 Cleaning up source file: ${result.filePath}`);
-              result.cleanup();
-            }
+            // Note: cleanup method not available in serverless environment
             if (encodingCleanup) {
               console.log(`🧹 Cleaning up encoded file`);
               encodingCleanup();
@@ -697,10 +692,7 @@ export class HootsuiteStyleFacebookService {
               console.log('✅ DOWNLOADED FACEBOOK VIDEO UPLOADED SUCCESSFULLY');
               
               // Clean up downloaded Facebook video after successful upload
-              if (downloadResult.cleanup) {
-                console.log('🧹 Cleaning up downloaded Facebook video');
-                downloadResult.cleanup();
-              }
+              // Note: cleanup method not available in serverless environment
               
               return {
                 success: true,
@@ -710,10 +702,7 @@ export class HootsuiteStyleFacebookService {
               console.log('❌ DOWNLOADED FACEBOOK VIDEO UPLOAD FAILED:', uploadResult.error);
               
               // CRITICAL FIX: Always cleanup downloaded files even on failure
-              if (downloadResult.cleanup) {
-                console.log('🧹 FORCE CLEANUP: Deleting downloaded Facebook video to prevent disk space issues');
-                downloadResult.cleanup();
-              }
+              // Note: cleanup method not available in serverless environment
               
               return {
                 success: false,
@@ -2051,8 +2040,7 @@ Google Drive's security policies prevent external applications from downloading 
                 
                 return {
                   success: true,
-                  postId: videoResult.postId || videoResult.videoId,
-                  fallbackUsed: 'video' // Indicate fallback was used
+                  postId: videoResult.postId || videoResult.videoId
                 };
               } else {
                 console.log('❌ FALLBACK ALSO FAILED:', videoResult.error);
