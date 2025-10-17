@@ -116,11 +116,12 @@ export function scheduleInstagramPost(post: Post): void {
   }
   
   // Cancel any existing job for this post
-  if (activeInstagramJobs[post.id]) {
-    console.log(`🔄 Canceling existing Instagram job for post ${post.id}`);
-    activeInstagramJobs[post.id].cancel();
-    delete activeInstagramJobs[post.id];
-  }
+  // Note: activeInstagramJobs not available in serverless environment
+  // if (activeInstagramJobs[post.id]) {
+  //   console.log(`🔄 Canceling existing Instagram job for post ${post.id}`);
+  //   activeInstagramJobs[post.id].cancel();
+  //   delete activeInstagramJobs[post.id];
+  // }
   
   const scheduledTime = new Date(post.scheduledFor);
   const now = new Date();
@@ -183,8 +184,8 @@ export function scheduleInstagramPost(post: Post): void {
         console.error(`Error updating Instagram post ${post.id} status:`, updateError);
       }
     } finally {
-      // Note: Job cleanup removed for serverless compatibility
-      // delete activeInstagramJobs[post.id];
+  // Note: Job cleanup removed for serverless compatibility
+  // Note: activeInstagramJobs not available in serverless environment
       console.log(`🧹 CLEANUP: Completed processing for Instagram post ${post.id}`);
     }
   };
@@ -223,12 +224,14 @@ export async function initializeScheduledInstagramPosts(): Promise<void> {
  */
 export async function cancelScheduledInstagramPost(postId: number): Promise<boolean> {
   try {
-    if (activeInstagramJobs[postId]) {
-      activeInstagramJobs[postId].cancel();
-      delete activeInstagramJobs[postId];
-      console.log(`Cancelled scheduled Instagram post ${postId}`);
-      return true;
-    }
+    // Note: activeInstagramJobs not available in serverless environment
+    // if (activeInstagramJobs[postId]) {
+    //   activeInstagramJobs[postId].cancel();
+    //   delete activeInstagramJobs[postId];
+    //   console.log(`Cancelled scheduled Instagram post ${postId}`);
+    //   return true;
+    // }
+    console.log(`ℹ️  Serverless mode: No active job to cancel for Instagram post ${postId}`);
     return false;
   } catch (error) {
     console.error(`Error cancelling scheduled Instagram post ${postId}:`, error);

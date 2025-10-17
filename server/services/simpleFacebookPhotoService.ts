@@ -174,9 +174,7 @@ export class SimpleFacebookPhotoService {
           const data = await response.json();
           
           // Clean up downloaded file
-          if (downloadResult.cleanup) {
-            downloadResult.cleanup();
-          }
+          // Note: cleanup method not available in serverless environment
           
           if (!response.ok || data.error) {
             console.error('Facebook photo upload error:', data.error);
@@ -194,9 +192,7 @@ export class SimpleFacebookPhotoService {
           
         } catch (fileError) {
           console.error('Error processing downloaded file:', fileError);
-          if (downloadResult.cleanup) {
-            downloadResult.cleanup();
-          }
+          // Note: cleanup method not available in serverless environment
           return {
             success: false,
             error: 'Failed to process downloaded image file'

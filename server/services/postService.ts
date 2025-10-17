@@ -259,11 +259,12 @@ export function schedulePostPublication(post: Post): void {
   }
   
   // Cancel any existing job for this post
-  if (activeJobs[post.id]) {
-    console.log(`🔄 Canceling existing job for post ${post.id}`);
-    activeJobs[post.id].cancel();
-    delete activeJobs[post.id];
-  }
+  // Note: activeJobs not available in serverless environment
+  // if (activeJobs[post.id]) {
+  //   console.log(`🔄 Canceling existing job for post ${post.id}`);
+  //   activeJobs[post.id].cancel();
+  //   delete activeJobs[post.id];
+  // }
   
   const scheduledTime = new Date(post.scheduledFor);
   const now = new Date();
@@ -371,9 +372,9 @@ export function schedulePostPublication(post: Post): void {
         console.error(`Error updating post ${post.id} status:`, updateError);
       }
     } finally {
-      // Note: Job cleanup removed for serverless compatibility
-      // delete activeJobs[post.id];
-      console.log(`🧹 CLEANUP: Completed processing for post ${post.id}`);
+        // Note: Job cleanup removed for serverless compatibility
+        // Note: activeJobs not available in serverless environment
+        console.log(`🧹 CLEANUP: Completed processing for post ${post.id}`);
     }
   };
   
@@ -549,12 +550,14 @@ export async function retryFailedPosts(): Promise<void> {
  */
 export async function cancelScheduledPost(postId: number): Promise<boolean> {
   try {
-    if (activeJobs[postId]) {
-      activeJobs[postId].cancel();
-      delete activeJobs[postId];
-      console.log(`Cancelled scheduled post ${postId}`);
-      return true;
-    }
+    // Note: activeJobs not available in serverless environment
+    // if (activeJobs[postId]) {
+    //   activeJobs[postId].cancel();
+    //   delete activeJobs[postId];
+    //   console.log(`Cancelled scheduled post ${postId}`);
+    //   return true;
+    // }
+    console.log(`ℹ️  Serverless mode: No active job to cancel for post ${postId}`);
     return false;
   } catch (error) {
     console.error(`Error cancelling scheduled post ${postId}:`, error);

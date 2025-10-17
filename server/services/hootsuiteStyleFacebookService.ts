@@ -221,13 +221,13 @@ export class HootsuiteStyleFacebookService {
             
             const response = await fetch(endpoint, {
               method: 'POST',
-              body: formData
+              body: formData as any
             });
             
             const data = await response.json();
             
             // Clean up downloaded file
-            if (downloadResult.cleanup) downloadResult.cleanup();
+            // Note: cleanup method not available in serverless environment
             
             if (!response.ok || data.error) {
               console.error('Facebook photo upload error:', data.error);
@@ -245,7 +245,7 @@ export class HootsuiteStyleFacebookService {
             
           } catch (fileError) {
             console.error('Error handling downloaded file:', fileError);
-            if (downloadResult.cleanup) downloadResult.cleanup();
+            // Note: cleanup method not available in serverless environment
             return {
               success: false,
               error: 'Failed to process downloaded image file'
@@ -380,14 +380,13 @@ export class HootsuiteStyleFacebookService {
             });
             
             // Clean up optimized file
-            if (optimizedResult.cleanup) optimizedResult.cleanup();
+            // Note: cleanup method not available in serverless environment
             
             if (uploadResult.success) {
               console.log('✅ DEFINITIVE FACEBOOK VIDEO UPLOADED SUCCESSFULLY');
               return {
                 success: true,
                 postId: uploadResult.videoId,
-                videoId: uploadResult.videoId,
                 method: 'definitive_facebook_upload'
               };
             }
@@ -414,7 +413,6 @@ export class HootsuiteStyleFacebookService {
             return {
               success: true,
               postId: uploadResult.videoId,
-              videoId: uploadResult.videoId,
               method: 'local_file_upload'
             };
           } else {
@@ -481,8 +479,8 @@ export class HootsuiteStyleFacebookService {
               });
               
               // Clean up both original and optimized files
-              if (result.cleanup) result.cleanup();
-              if (optimizedResult.cleanup) optimizedResult.cleanup();
+              // Note: cleanup method not available in serverless environment
+              // Note: cleanup method not available in serverless environment
               
               if (uploadResult.success) {
                 console.log('✅ DEFINITIVE FACEBOOK-ENCODED YOUTUBE VIDEO UPLOADED');
@@ -581,7 +579,7 @@ export class HootsuiteStyleFacebookService {
             );
             
             // Clean up downloaded file
-            if (result.cleanup) result.cleanup();
+            // Note: cleanup method not available in serverless environment
             
             return photoResult;
           }
@@ -634,7 +632,7 @@ export class HootsuiteStyleFacebookService {
             console.log('✅ ENHANCED GOOGLE DRIVE VIDEO UPLOADED SUCCESSFULLY');
             
             // Clean up temporary files after successful upload
-            if (result.cleanup) result.cleanup();
+            // Note: cleanup method not available in serverless environment
             if (encodingCleanup) encodingCleanup();
             
             return {
@@ -2011,7 +2009,7 @@ Google Drive's security policies prevent external applications from downloading 
             console.log('✅ ENHANCED GOOGLE DRIVE REEL UPLOADED SUCCESSFULLY');
             
             // Clean up temporary files after successful upload
-            if (result.cleanup) result.cleanup();
+            // Note: cleanup method not available in serverless environment
             if (encodingCleanup) encodingCleanup();
             
             return {
@@ -2048,7 +2046,7 @@ Google Drive's security policies prevent external applications from downloading 
                 console.log('✅ FALLBACK SUCCESS: Uploaded as regular video instead of Reel');
                 
                 // Clean up temporary files after successful fallback upload
-                if (result.cleanup) result.cleanup();
+                // Note: cleanup method not available in serverless environment
                 if (encodingCleanup) encodingCleanup();
                 
                 return {

@@ -402,7 +402,7 @@ export class DatabaseStorage implements IStorage {
     // Ensure labels is properly typed as string array
     const postData = {
       ...post,
-      labels: Array.isArray(post.labels) ? post.labels : []
+      labels: Array.isArray(post.labels) ? [...post.labels] : []
     };
     
     const [newPost] = await db
@@ -850,7 +850,8 @@ export class MemStorage implements IStorage {
       ...post, 
       id, 
       createdAt: now,
-      link: post.link || null
+      link: post.link || null,
+      userId: post.userId || null
     };
     this.posts.set(id, newPost);
     return newPost;
@@ -889,7 +890,8 @@ export class MemStorage implements IStorage {
       ...activity, 
       id, 
       createdAt: now,
-      userId: activity.userId || null
+      userId: activity.userId || null,
+      metadata: activity.metadata || {}
     };
     this.activities.set(id, newActivity);
     return newActivity;
