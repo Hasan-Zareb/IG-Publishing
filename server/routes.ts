@@ -251,10 +251,10 @@ export function registerRoutes(app: Express) {
         }
 
         // Import unified timezone conversion utility
-        const { parseISTDateToUTC } = await import('./utils/timezoneUtils');
+        const { convertISTToUTC } = await import('./utils/timezoneUtils');
         
         // Convert scheduledFor from IST to UTC for consistent storage
-        const scheduledForUTC = parseISTDateToUTC(result.data.scheduledFor, 'API scheduled post');
+        const scheduledForUTC = convertISTToUTC(result.data.scheduledFor);
         
         const post = await storage.createPost({
           ...result.data,
