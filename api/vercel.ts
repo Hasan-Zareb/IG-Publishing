@@ -20,7 +20,7 @@ app.use(passport.session());
 registerRoutes(app);
 
 // Serve static files from the built frontend
-app.use(express.static(path.join(process.cwd(), 'client/dist')));
+app.use(express.static(path.join(process.cwd(), 'dist/public')));
 
 // Catch-all handler: send back React's index.html file for any non-API routes
 app.get('*', (req, res) => {
@@ -30,7 +30,7 @@ app.get('*', (req, res) => {
   }
   
   // Serve the React app for all other routes
-  res.sendFile(path.join(process.cwd(), 'client/dist/index.html'));
+  res.sendFile(path.join(process.cwd(), 'dist/public/index.html'));
 });
 
 // Export for Vercel
