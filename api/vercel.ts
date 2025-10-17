@@ -3,7 +3,7 @@ import path from 'path';
 import { setupMiddleware } from '../server/middleware';
 import { registerRoutes } from '../server/routes';
 import passport from 'passport';
-import { initializePassport } from '../server/auth';
+import { setupAuth } from '../server/auth';
 
 // Create Express app
 const app = express();
@@ -12,7 +12,7 @@ const app = express();
 setupMiddleware(app);
 
 // Initialize Passport
-initializePassport();
+setupAuth();
 app.use(passport.initialize());
 app.use(passport.session());
 
