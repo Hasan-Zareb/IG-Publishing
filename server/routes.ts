@@ -260,7 +260,7 @@ export function registerRoutes(app: Express) {
           ...result.data,
           userId: user.id,
           scheduledFor: scheduledForUTC
-        } as any);
+        });
 
         // Set up the actual scheduling job
         const { schedulePostPublication } = await import('./services/postService');

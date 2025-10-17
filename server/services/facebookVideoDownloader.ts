@@ -141,19 +141,13 @@ Facebook has tightened security for video downloads. Only public videos from pag
       console.log('🔍 Extracting video info from Facebook page...');
 
       // Check if puppeteer is available (not in serverless environments)
-      let puppeteer: any;
-      try {
-        puppeteer = await import('puppeteer');
-      } catch (error: any) {
-        return {
-          success: false,
-          error: 'Puppeteer not available in serverless environment. Facebook video downloading is not supported on Vercel.'
-        };
-      }
-
       let browser: any = null;
-      // Launch browser with stealth settings and additional Linux flags
-      browser = await (puppeteer as any).default.launch({
+      try {
+        // Use dynamic import to avoid TypeScript compilation issues
+        const puppeteer = await eval('import("puppeteer")');
+        
+        // Launch browser with stealth settings and additional Linux flags
+        browser = await puppeteer.default.launch({
         headless: true,
         executablePath: '/usr/bin/chromium',
         args: [
@@ -288,6 +282,14 @@ Facebook has tightened security for video downloads. Only public videos from pag
         success: true,
         ...videoInfo
       };
+
+      } catch (importError) {
+        // Handle puppeteer import error
+        return {
+          success: false,
+          error: 'Puppeteer not available in serverless environment. Facebook video downloading is not supported on Vercel.'
+        };
+      }
 
     } catch (error) {
       if (browser) await browser.close();
